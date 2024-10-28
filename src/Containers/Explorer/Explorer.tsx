@@ -160,7 +160,7 @@ function Explorer() {
     <>
       <div className={`mr2 bg-navy br4 ${selectedObjects.length > 0 ? "o-100" : "o-0"} `} style={mainDivStyle}>
         <div className='flex justify-center mt1'>
-          <button onClick={onDelete}>
+          <button className={"bg-red"} onClick={onDelete}>
             Delete
           </button>
           <button onClick={onDuplicate}>

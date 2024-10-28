@@ -19,7 +19,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
     const [_, forceUpdate] = useReducer((x) => x + 1, 0);
     const canvasRef = useRef(null)
     const canvas2Ref = useRef(null)
-    const canvasListRef = useRef([canvasRef, canvas2Ref])
+    const canvasListRef = useRef([canvasRef])
     const handlerRef = useRef<WebGPUHandler | boolean>(false)
     const loadedRef = useRef<boolean>(false)
     const rotateEnabled = useRef<boolean>(false)
@@ -149,8 +149,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
         const screenToCameraDirection = ScreenToCameraDirection([event.nativeEvent.offsetX, event.nativeEvent.offsetY])
         const screenCenter = ScreenToCameraDirection([WorldSettings.Width / 2, WorldSettings.Height / 2])
         // const cameraLookVector = new Vector3(CameraRotation).GetLookVector()
-        // const rayDirection = screenToCameraDirection
-        const rayDirection = screenCenter
+        const rayDirection = screenToCameraDirection
 
         DrawRay("DirectionRay", rayPosition, rayDirection, rayDistance, [1, 0.1, 0.1, 0.5], 10)
 
@@ -158,12 +157,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
         DrawVector("yAxis", new Vector3([0, 25, 0]), [0, 1, 0, 1])
         DrawVector("zAxis", new Vector3([0, 0, 25]), [0, 0, 1, 1])
 
-        // GetFrustumCornersWorldSpace().forEach((vector, index) => {
-        //     console.log(vector.vector)
-        //     DrawRay(`FrustrumCorner${index}`, vector, new Vector3([0, 1, 0]), 150)
-        // })
-
-        // View frustrum centers
+        // View frustrum centers - SHADOWMAP DEBUG
         const shadowCascadeLevels = WorldSettings.ShadowCascadeLevels
         for (let i = 0; i < shadowCascadeLevels.length + 1; i++) {
             let nearPlane = 0
@@ -191,49 +185,21 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
             // DrawRay(`FrustrumCenter${i}`, center, new Vector3([0, 1, 0]), 600, [color, color, color, 1], 25)
         }
 
-        // // Light frustrum centers
+        // Light frustrum centers - SHADOWMAP DEBUG
         GetDirectionalLightMatrices().forEach((lightMatrix, index) => {
             const corners = GetFrustumCornersWorldSpace(lightMatrix)
             // let center = new Vector3([0, 0, 0])
             corners.forEach((corner, cornerIndex) => {
                 // center = center.AddVector(corner)
                 const color = index / (WorldSettings.ShadowCascadeLevels.length + 1)
-                DrawRay(`LightMatrixCorner${index}${cornerIndex}`, corner, new Vector3([0, 1, 0]), 600, [1 - color, color, 0, 1], 75)
+                // DrawRay(`LightMatrixCorner${index}${cornerIndex}`, corner, new Vector3([0, 1, 0]), 600, [1 - color, color, 0, 1], 75)
             })
             // center = center.DivideScalar(corners.length)
             // const color = index / (WorldSettings.ShadowCascadeLevels.length + 1)
             // DrawRay(`LightMatrixCenter${index}`, center, new Vector3(WorldSettings.LightDirection), 600, [1 - color, color, 0, 1], 75)
         })
 
-        // Light frustrum centers
-        // GetDirectionalLightMatrices().forEach((lightMatrix, index) => {
-        //     const corners = GetFrustumCornersWorldSpace(lightMatrix)
-        //     let center = new Vector3(GetVector3Position(corners.map(vector => vector.vector), "Center"))
-        //     let min = new Vector3(GetVector3Position(corners.map(vector => vector.vector), "Min"))
-        //     let max = new Vector3(GetVector3Position(corners.map(vector => vector.vector), "Max"))
-        //     const color = index / (WorldSettings.ShadowCascadeLevels.length + 1)
-        //     // corners.forEach((corner, cornerIndex) => {
-        //     //     center = center.AddVector(corner)
-        //     //     // const color = index / (WorldSettings.ShadowCascadeLevels.length + 1)
-        //     //     // DrawRay(`LightMatrixCorner${index}${cornerIndex}`, corner, new Vector3([0, 1, 0]), 600, [1 - color, color, 0, 1], 75)
-        //     // })
-        //     // center = center.DivideScalar(corners.length)
-
-        //     // const center = GetObjectCenterPosition(object).vector
-        //     // const min = GetObjectMinPosition(object)
-        //     // const max = GetObjectMaxPosition(object)
-        //     const minMaxVector = min.SubtractVector(max)
-        //     const visualScale = [
-        //     Math.abs(minMaxVector.vector[0]) + 5,
-        //     Math.abs(minMaxVector.vector[1]) + 5,
-        //     Math.abs(minMaxVector.vector[2]) + 5,
-        //     ] as [number, number, number]
-
-        //     DrawCube(`LightMatrixCube${index}`, center, new Vector3(visualScale), undefined, [1 - color, color, 0, 0.5])
-        // })
-
         const rayData = Raycast(rayPosition, rayDirection, rayDistance)
-        // console.log(rayData)
         console.log(CameraRotation)
 
         if (rayData) {
@@ -260,7 +226,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
     return (
         <>
             <canvas ref={canvasRef} className='renderer-canvas' style={canvasStyle} {...props} onContextMenu={event => {event.preventDefault()}} onMouseMove={HandleMouseMove} onTouchMove={HandleTouchMove} onMouseDown={HandleMouseDown} onMouseUp={HandleMouseUp} onTouchStart={HandleTouchStart} onTouchEnd={EndDrag}/>
-            <canvas ref={canvas2Ref} className='renderer-canvas' style={canvasStyle} {...props} onContextMenu={event => {event.preventDefault()}} onMouseMove={HandleMouseMove} onTouchMove={HandleTouchMove} onMouseDown={HandleMouseDown} onMouseUp={HandleMouseUp} onTouchStart={HandleTouchStart} onTouchEnd={EndDrag}/>
+            {/* <canvas ref={canvas2Ref} className='renderer-canvas' style={canvasStyle} {...props} onContextMenu={event => {event.preventDefault()}} onMouseMove={HandleMouseMove} onTouchMove={HandleTouchMove} onMouseDown={HandleMouseDown} onMouseUp={HandleMouseUp} onTouchStart={HandleTouchStart} onTouchEnd={EndDrag}/> */}
         </>
     )
 }

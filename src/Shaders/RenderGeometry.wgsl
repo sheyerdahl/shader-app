@@ -50,6 +50,7 @@ struct FragmentShaderOut {
 @group(0) @binding(12) var<storage> cascadePlaneDistances: array<f32>;
 @group(0) @binding(13) var<uniform> cameraView: mat4x4f;
 @group(0) @binding(14) var<uniform> cameraFarPlane: f32;
+@group(0) @binding(15) var<uniform> shadowsEnabled: u32;
 
 @group(1) @binding(0) var selectedTexture: texture_2d<f32>;
 @group(1) @binding(1) var<uniform> hasTexture: u32;
@@ -180,6 +181,7 @@ fn fragmentMain(data: VertexShaderOut) -> FragmentShaderOut {
         }
     // }
 
+    shadow = select(shadow, 1, shadowsEnabled == 0 || data.ignoreLighting == 1);
     let shadowColor = max(0.1, shadow);
 
     // let worldTransformation = worldTransformationMatrixs[u32(vertex.transformationIndex)]; TEMPORARILY HERE for comparison with ShadowMap.wgsl
@@ -189,25 +191,26 @@ fn fragmentMain(data: VertexShaderOut) -> FragmentShaderOut {
 
     // let shadowDepth = textureSample(shadowMapTexture, shadowMapSampler, shadowMapUV.xy, layer);
     // let shadowColor = select(0.1, 1, shadowMapUV.z > shadowDepth);
-    var cascadeColor: vec4f;
-    if (layer == 0) {
-        cascadeColor = vec4f(1, 0, 0, 1);
-    } else if (layer == 1) {
-        cascadeColor = vec4f(0, 1, 0, 1);
-    } else if (layer == 2) {
-        cascadeColor = vec4f(0, 0, 1, 1);
-    } else if (layer == 3) {
-        cascadeColor = vec4f(1, 1, 0, 1);
-    } else if (layer == 4) {
-        cascadeColor = vec4f(1, 0, 1, 1);
-    } else if (layer == 5) {
-        cascadeColor = vec4f(1, 1, 1, 1);
-    }
+    // var cascadeColor: vec4f;
+    // if (layer == 0) {
+    //     cascadeColor = vec4f(1, 0, 0, 1);
+    // } else if (layer == 1) {
+    //     cascadeColor = vec4f(0, 1, 0, 1);
+    // } else if (layer == 2) {
+    //     cascadeColor = vec4f(0, 0, 1, 1);
+    // } else if (layer == 3) {
+    //     cascadeColor = vec4f(1, 1, 0, 1);
+    // } else if (layer == 4) {
+    //     cascadeColor = vec4f(1, 0, 1, 1);
+    // } else if (layer == 5) {
+    //     cascadeColor = vec4f(1, 1, 1, 1);
+    // }
 
     // let finalColor = cascadeColor;
     let finalColor = pointLightingColor * vec4f(shadowColor, shadowColor, shadowColor, 1);
     // let finalColor = pointLightingColor;
     // let finalColor = vec4f(shadowMapUV.xy, 0, 1);
+    // let finalColor = vec4f(shadowColor, shadowColor, shadowColor, 1);
 
     var output: FragmentShaderOut;
     output.canvasColor = finalColor;

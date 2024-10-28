@@ -14,6 +14,7 @@ interface IWorldSettings {
     CameraFarPlane: number,
     CameraNearPlane: number,
     ShadowCascadeLevels: [number, number, number, number],
+    ShadowsEnabled: boolean,
 }
 
 const WorldSettings: IWorldSettings = {
@@ -29,8 +30,9 @@ const WorldSettings: IWorldSettings = {
     CameraFarPlane: cameraFarPlane,
     CameraNearPlane: cameraNearPlane,
     // ShadowCascadeLevels: [cameraFarPlane / 50.0, cameraFarPlane / 25.0, cameraFarPlane / 10.0, cameraFarPlane / 2.0],
-    // ShadowCascadeLevels: [cameraFarPlane / 10.0, cameraFarPlane / 7.5, cameraFarPlane / 5.0, cameraFarPlane / 1.5],
-    ShadowCascadeLevels: [cameraFarPlane / 5, cameraFarPlane / 3.75, cameraFarPlane / 2.5, cameraFarPlane / 1.25],
+    ShadowCascadeLevels: [cameraFarPlane / 10.0, cameraFarPlane / 7.5, cameraFarPlane / 5.0, cameraFarPlane / 1.5],
+    // ShadowCascadeLevels: [cameraFarPlane / 5, cameraFarPlane / 3.75, cameraFarPlane / 2.5, cameraFarPlane / 1.25],
+    ShadowsEnabled: false,
 }
 
 export default WorldSettings

@@ -201,7 +201,12 @@ export default class WebGPUHandler {
                     binding: 14,
                     visibility: GPUShaderStage.FRAGMENT,
                     buffer: {type: "uniform"},
-                }
+                },
+                {
+                    binding: 15,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    buffer: {type: "uniform"},
+                },
             ]
         })
 
@@ -385,32 +390,34 @@ export default class WebGPUHandler {
         const contextTexture0 = this.contexts[0].getCurrentTexture()
 
         // ShadowMap pass
-        for (let i = 0; i < WorldSettings.ShadowCascadeLevels.length + 1; i++) {
-            const pass = encoder.beginRenderPass({
-                colorAttachments: [],
-                depthStencilAttachment: {
-                    view: textures.ShadowMapAttachment.createView({baseArrayLayer: i, arrayLayerCount: 1}),
-                    depthClearValue: 1,
-                    depthLoadOp: "clear",
-                    depthStoreOp: "store"
-                }
-            })
-
-            pass.setPipeline(this.pipelines.ShadowMapPipeline)
-            pass.setBindGroup(0, bindGroups.ShadowMapBindGroup)
-            pass.setBindGroup(1, bindGroups.DirectionalLightMatrixBindGroups[i])
-
-            BuffersAndBindGroups.OffsetData.forEach(offsetData => {
-                // const instanceAmount = this.geometryData.Data.length / 4
-                pass.setVertexBuffer(0, buffers.GeometryVertex, offsetData.VertexOffset, offsetData.VertexSize)
-                // pass.setVertexBuffer(1, buffers.GeometryVertexData, offsetData.VertexDataOffset, offsetData.VertexDataSize)
-                pass.setVertexBuffer(1, buffers.GeometryInstanceData, offsetData.InstanceDataOffset, offsetData.InstanceDataSize)
-                pass.setIndexBuffer(buffers.GeometryIndex, "uint32", offsetData.IndexOffset, offsetData.IndexSize)
-                
-                pass.drawIndexed(offsetData.IndexSize / 4)
-            })
-
-            pass.end()
+        if (WorldSettings.ShadowsEnabled) {
+            for (let i = 0; i < WorldSettings.ShadowCascadeLevels.length + 1; i++) {
+                const pass = encoder.beginRenderPass({
+                    colorAttachments: [],
+                    depthStencilAttachment: {
+                        view: textures.ShadowMapAttachment.createView({baseArrayLayer: i, arrayLayerCount: 1}),
+                        depthClearValue: 1,
+                        depthLoadOp: "clear",
+                        depthStoreOp: "store"
+                    }
+                })
+    
+                pass.setPipeline(this.pipelines.ShadowMapPipeline)
+                pass.setBindGroup(0, bindGroups.ShadowMapBindGroup)
+                pass.setBindGroup(1, bindGroups.DirectionalLightMatrixBindGroups[i])
+    
+                BuffersAndBindGroups.OffsetData.forEach(offsetData => {
+                    // const instanceAmount = this.geometryData.Data.length / 4
+                    pass.setVertexBuffer(0, buffers.GeometryVertex, offsetData.VertexOffset, offsetData.VertexSize)
+                    // pass.setVertexBuffer(1, buffers.GeometryVertexData, offsetData.VertexDataOffset, offsetData.VertexDataSize)
+                    pass.setVertexBuffer(1, buffers.GeometryInstanceData, offsetData.InstanceDataOffset, offsetData.InstanceDataSize)
+                    pass.setIndexBuffer(buffers.GeometryIndex, "uint32", offsetData.IndexOffset, offsetData.IndexSize)
+                    
+                    pass.drawIndexed(offsetData.IndexSize / 4)
+                })
+    
+                pass.end()
+            }
         }
 
         encoder.copyTextureToTexture({ texture: textures.ShadowMapAttachment}, { texture: textures.ShadowMapBindable }, {width: 1024, height: 1024, depthOrArrayLayers: WorldSettings.ShadowCascadeLevels.length + 1})
@@ -462,39 +469,39 @@ export default class WebGPUHandler {
             pass.end()
         }
         
-        // encoder.copyTextureToTexture({ texture: textures.RenderGeometryAttachment}, { texture: textures.RenderGeometryBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
-        // encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBrightColorsBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        encoder.copyTextureToTexture({ texture: textures.RenderGeometryAttachment}, { texture: textures.RenderGeometryBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBrightColorsBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
         
-        // // BlurFilter pass
-        // const BlurFilterPass = (bindGroup: GPUBindGroup) => {
-        //     const pass = encoder.beginRenderPass({
-        //         colorAttachments: [
-        //             {
-        //                 view: textures.BlurFilterAttachment.createView(),
-        //                 loadOp: "load",
-        //                 clearValue: {r: 0, g: 0, b: 0, a: 1},
-        //                 storeOp: "store"
-        //             },
-        //         ],
-        //     })
+        // BlurFilter pass
+        const BlurFilterPass = (bindGroup: GPUBindGroup) => {
+            const pass = encoder.beginRenderPass({
+                colorAttachments: [
+                    {
+                        view: textures.BlurFilterAttachment.createView(),
+                        loadOp: "load",
+                        clearValue: {r: 0, g: 0, b: 0, a: 1},
+                        storeOp: "store"
+                    },
+                ],
+            })
 
-        //     pass.setPipeline(this.pipelines.BlurFilterPipeline)
-        //     pass.setBindGroup(0, bindGroup)
-        //     pass.draw(6)
+            pass.setPipeline(this.pipelines.BlurFilterPipeline)
+            pass.setBindGroup(0, bindGroup)
+            pass.draw(6)
 
-        //     pass.end()
-        // }
+            pass.end()
+        }
         
-        // BlurFilterPass(bindGroups.BlurFilterBindGroupVertical)
+        BlurFilterPass(bindGroups.BlurFilterBindGroupVertical)
         
-        // const blurIterations = 10
-        // for (let i = 0; i < blurIterations; i++) {
-        //     encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBrightColorsBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        const blurIterations = 10
+        for (let i = 0; i < blurIterations; i++) {
+            encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBrightColorsBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
     
-        //     BlurFilterPass(i % 2 === 0 ? bindGroups.BlurFilterBindGroupVertical : bindGroups.BlurFilterBindGroupHorizontal)
-        // }
+            BlurFilterPass(i % 2 === 0 ? bindGroups.BlurFilterBindGroupVertical : bindGroups.BlurFilterBindGroupHorizontal)
+        }
 
-        // encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBloomBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        encoder.copyTextureToTexture({ texture: textures.BlurFilterAttachment}, { texture: textures.BlurFilterBloomBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
 
 
         // PostProcess pass
@@ -504,7 +511,7 @@ export default class WebGPUHandler {
                     {
                         view: textures.PostProcessAttachment.createView(),
                         loadOp: "clear",
-                        clearValue: {r: 0, g: 0, b: 0, a: 1},
+                        clearValue: {r: 0, g: 1, b: 0, a: 1},
                         storeOp: "store"
                     },
                 ],
@@ -520,7 +527,8 @@ export default class WebGPUHandler {
         encoder.copyTextureToTexture({ texture: textures.PostProcessAttachment}, { texture: textures.PostProcessBindable }, {width: WorldSettings.Width, height: WorldSettings.Height})
 
         encoder.copyTextureToTexture({ texture: textures.PostProcessAttachment}, { texture: contextTexture0 }, {width: WorldSettings.Width, height: WorldSettings.Height})
-        encoder.copyTextureToTexture({ texture: textures.RenderGeometryAttachment}, { texture: this.contexts[1].getCurrentTexture() }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        //encoder.copyTextureToTexture({ texture: textures.RenderGeometryAttachment}, { texture: contextTexture0 }, {width: WorldSettings.Width, height: WorldSettings.Height})
+        // encoder.copyTextureToTexture({ texture: textures.RenderGeometryAttachment}, { texture: this.contexts[1].getCurrentTexture() }, {width: WorldSettings.Width, height: WorldSettings.Height})
 
         this.device.queue.submit([encoder.finish()])
 
@@ -580,6 +588,7 @@ export default class WebGPUHandler {
 
         const shadowCascadeLevelsTyped = new Float32Array(WorldSettings.ShadowCascadeLevels)
         const cameraFarPlaneTyped = new Float32Array(WorldSettings.CameraFarPlane)
+        const shadowsEnabledTyped = new Uint32Array([WorldSettings.ShadowsEnabled ? 1 : 0])
    
         const geometryInstanceDataBuffer = device.createBuffer({
             label: "Geometry instance data buffer",
@@ -667,6 +676,12 @@ export default class WebGPUHandler {
             size: cameraFarPlaneTyped.byteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
+        
+        const shadowsEnabledBuffer = device.createBuffer({
+            label: "Shadows Enabled buffer",
+            size: shadowsEnabledTyped.byteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        })
 
         // console.time("Test")
         const r = [255, 0, 0, 255]
@@ -723,6 +738,7 @@ export default class WebGPUHandler {
         device.queue.writeBuffer(directionalLightMatricesBuffer, 0, new Float32Array(GetDirectionalLightMatrices().map(matrix => matrix.matrix as number[]).reduce((acc, value) => [...acc, ...value])))
         device.queue.writeBuffer(cameraViewMatrixBuffer, 0, new Float32Array(cameraViewMatrix.matrix))
         device.queue.writeBuffer(cameraFarPlaneBuffer, 0, cameraFarPlaneTyped)
+        device.queue.writeBuffer(shadowsEnabledBuffer, 0, shadowsEnabledTyped)
 
         // ShadowMap
         const directionalLightMatrixBindGroups: GPUBindGroup[] = []
@@ -776,6 +792,7 @@ export default class WebGPUHandler {
                 {binding: 12, resource: {buffer: cascadePlaneDistancesBuffer}},
                 {binding: 13, resource: {buffer: cameraViewMatrixBuffer}},
                 {binding: 14, resource: {buffer: cameraFarPlaneBuffer}},
+                {binding: 15, resource: {buffer: shadowsEnabledBuffer}},
             ]
         })
 

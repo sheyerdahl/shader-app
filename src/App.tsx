@@ -19,6 +19,7 @@ function App() {
   const [currentGamemodeColor, setCurrentGamemodeColor] = useState<string>("blue")
   const [selectedObjects, setSelectedObjects] = useContext(SelectedObjects)
   const [viewScale, setViewScale] = useState("1")
+  const [shadowsEnabled, setShadowsEnabled] = useState(WorldSettings.ShadowsEnabled)
 
   useEffect(() => {
     if (loadedRef.current || loaded) {return}
@@ -102,6 +103,12 @@ function App() {
     UpdateWorldWidthAndHeight(Number(newValue))
   }
 
+  const onSunShadowsInputChange = () => {
+    const newShadowsEnabled = !shadowsEnabled
+    setShadowsEnabled(!shadowsEnabled)
+    WorldSettings.ShadowsEnabled = newShadowsEnabled
+  }
+
   const DropDownFunctions = {
     "Cube": () => {
       return NewCube({UseCameraOffset: true, RandomColor: true})
@@ -164,21 +171,29 @@ function App() {
       </p>
 
       <div className='flex items-center justify-center'>
-        <button onClick={OnClear}>
+        <button className='bg-red' onClick={OnClear}>
           Clear World
         </button>
 
         <DropDownButton buttonText='Add Object' onItemSelected={onItemSelected} items={dropDownItems}/>
-
+        
         <button onClick={OnToggleGameMode}>
           Toggle Gamemode
         </button>
 
         <p className={`w4 h2 b br3 tc v-mid ml2 ${currentGamemodeColor}`}>Gamemode: {currentGamemode}</p>
+      </div>
+
+      <div className='flex items-center justify-center'>
         <div className='ml2'>
-          <p className='b'>View Scale</p>
-          <input className='w3' onChange={onInputChange} value={viewScale} />
-        </div>
+            <p className='b'>View Scale</p>
+            <input className='w3' onChange={onInputChange} value={viewScale} />
+          </div>
+
+          <div className='ml2'>
+            <p className='b yellow'>Sun Shadows - WIP</p>
+            <input className='w4 h1 bg-grey b--grey' type='checkbox' onChange={onSunShadowsInputChange} checked={shadowsEnabled} />
+          </div>
       </div>
       {/* <button onClick={OnAddCube}>
         Add Cube
