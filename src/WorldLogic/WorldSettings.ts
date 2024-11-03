@@ -22,7 +22,7 @@ const WorldSettings: IWorldSettings = {
     Height: 500,
     FOV: 90,
     Gamemode: "Edit",
-    NumTextures: 5,
+    NumTextures: 6,
     EditMoveSpeed: 1.5,
     IngameMoveSpeed: 1,
     MoveCooldown: 5,

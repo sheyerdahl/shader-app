@@ -4,6 +4,7 @@ import { CameraOffset, CameraRotation } from "./Camera"
 import { GetObjectCenterPosition } from "./ObjectUtils"
 import { Vector3 } from "./Vector3"
 import { DrawRay } from "./Debug"
+import GetSunObject from "./SunObject"
 
 interface NewCubeData {
     Scale?: [number, number, number],
@@ -16,6 +17,7 @@ interface NewCubeData {
     DontSave?: boolean,
     IgnoreRaycast?: boolean,
     IgnoreLighting?: boolean,
+    DontCastShadow?: boolean,
 }
 
 // Keys match WGSL struct code
@@ -36,6 +38,7 @@ export interface OffsetData {
     VertexDataOffset: number,
     VertexDataSize: number,
     TextureId: number,
+    DontCastShadow?: boolean,
 }
 
 export interface ThreeDObject {
@@ -61,6 +64,7 @@ export interface ThreeDObject {
         DontShowInExplorer?: boolean,
         InternalName?: string,
         IgnoreLighting?: boolean,
+        DontCastShadow?: boolean,
     }
 }
 
@@ -558,7 +562,7 @@ function AllGeometryDataToTypedArrays(): TypedArraysOut {
     let instanceDataOffset = 0
     let vertexDataOffset = 0
 
-    const objects = GetWorldObjects()
+    const objects = [...GetWorldObjects(), GetSunObject()]
 
     objects.forEach((object, index) => {
         const lightData = object.Data.Light
@@ -660,6 +664,7 @@ function AllGeometryDataToTypedArrays(): TypedArraysOut {
             VertexDataOffset: vertexDataOffset,
             VertexDataSize: vertexDataCounter,
             TextureId: Math.min(object.Data.TextureId || 0, WorldSettings.NumTextures),
+            DontCastShadow: object.Data.DontCastShadow,
         })
 
         vertexOffset += vertexCounter
@@ -682,7 +687,7 @@ function AllGeometryDataToTypedArrays(): TypedArraysOut {
     }
 }
 
-function NewCube(data: NewCubeData): ThreeDObject {
+function GetCubeObject(data: NewCubeData): ThreeDObject {
     const newColor = data.RandomColor ? [Math.random(), Math.random(), Math.random(), 1] : (data.Color || [1, 1, 1, 1])
     let newOffset = Array.from(cube.Data.Offset) as [number, number, number]
 
@@ -707,9 +712,16 @@ function NewCube(data: NewCubeData): ThreeDObject {
             DontSave: data.DontSave,
             IgnoreRaycast: data.IgnoreRaycast,
             IgnoreLighting: data.IgnoreLighting,
+            DontCastShadow: data.DontCastShadow,
         }
     }
-  
+
+    return newCube
+}
+
+function NewCube(data: NewCubeData): ThreeDObject {
+    const newCube = GetCubeObject(data)
+
     AddWorldObject(newCube)
 
     return newCube
@@ -722,6 +734,7 @@ export {
     AllGeometryDataToTypedArrays,
     ClearWorldObjects,
     NewCube,
+    GetCubeObject,
     DeleteObjectsByName,
     GetObjectsByName,
     GetViewProjectionMatrix,

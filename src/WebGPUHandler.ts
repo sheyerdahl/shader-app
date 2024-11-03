@@ -37,7 +37,11 @@ const textureList: {name: string, videoURL?: string, video?: HTMLVideoElement, b
     {
         name: "WoodPlank2",
         bitmap: await loadImageBitmap("/src/assets/WoodPlank2.jpg"),
-    }
+    },
+    {
+        name: "Sun",
+        bitmap: await loadImageBitmap("/src/assets/Sun1.webp"),
+    },
 ]
 
 textureList.forEach(textureItem => {
@@ -388,6 +392,11 @@ export default class WebGPUHandler {
         const bindGroups = BuffersAndBindGroups.bindGroups
         const textures = BuffersAndBindGroups.textures
         const contextTexture0 = this.contexts[0].getCurrentTexture()
+        const renderGeometryDepthTexture = this.device.createTexture({
+            size: [contextTexture0.width, contextTexture0.height],
+            format: "depth24plus",
+            usage: GPUTextureUsage.RENDER_ATTACHMENT
+        })
 
         // ShadowMap pass
         if (WorldSettings.ShadowsEnabled) {
@@ -407,6 +416,7 @@ export default class WebGPUHandler {
                 pass.setBindGroup(1, bindGroups.DirectionalLightMatrixBindGroups[i])
     
                 BuffersAndBindGroups.OffsetData.forEach(offsetData => {
+                    if (offsetData.DontCastShadow) {return}
                     // const instanceAmount = this.geometryData.Data.length / 4
                     pass.setVertexBuffer(0, buffers.GeometryVertex, offsetData.VertexOffset, offsetData.VertexSize)
                     // pass.setVertexBuffer(1, buffers.GeometryVertexData, offsetData.VertexDataOffset, offsetData.VertexDataSize)
@@ -440,11 +450,7 @@ export default class WebGPUHandler {
                     },
             ],
                 depthStencilAttachment: {
-                    view: this.device.createTexture({
-                        size: [contextTexture0.width, contextTexture0.height],
-                        format: "depth24plus",
-                        usage: GPUTextureUsage.RENDER_ATTACHMENT
-                    }).createView(),
+                    view: renderGeometryDepthTexture.createView(),
                     depthClearValue: 1,
                     depthLoadOp: "clear",
                     depthStoreOp: "store"
