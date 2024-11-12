@@ -18,6 +18,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
     const [selectedObjects, setSelectedObjects] = useContext(SelectedObjects)
     const canvasSizeRef = useRef([WorldSettings.Width, WorldSettings.Height])
     const [_, forceUpdate] = useReducer((x) => x + 1, 0);
+    const [showWebGPUError, setShowWebGPUError] = useState(false)
     const canvasRef = useRef(null)
     const canvas2Ref = useRef(null)
     const canvasListRef = useRef([canvasRef])
@@ -105,12 +106,14 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
         
         if (handler === false) {
             if (!navigator.gpu) {
+                setShowWebGPUError(true)
                 throw new Error("WebGPU not supported on this browser.");
             }
 
             handlerRef.current = true
             const adapter = await navigator.gpu.requestAdapter()
             if (!adapter) {
+                setShowWebGPUError(true)
                 throw new Error("No appropriate GPUAdapter found.");
             }
 
@@ -120,6 +123,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
                 const context = canvas.getContext("webgpu")
 
                 if (context === null) {
+                    setShowWebGPUError(true)
                     console.warn("Error getting context")
                 }
 
@@ -234,6 +238,7 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
 
     return (
         <>
+            <p className={`renderer-canvas ${showWebGPUError ? '' : 'dn'}`}>WebGPU not supported on this browser.</p>
             <canvas ref={canvasRef} className='renderer-canvas' style={canvasStyle} {...props} onContextMenu={event => {event.preventDefault()}} onMouseMove={HandleMouseMove} onTouchMove={HandleTouchMove} onMouseDown={HandleMouseDown} onMouseUp={HandleMouseUp} onTouchStart={HandleTouchStart} onTouchEnd={EndDrag}/>
             {/* <canvas ref={canvas2Ref} className='renderer-canvas' style={canvasStyle} {...props} onContextMenu={event => {event.preventDefault()}} onMouseMove={HandleMouseMove} onTouchMove={HandleTouchMove} onMouseDown={HandleMouseDown} onMouseUp={HandleMouseUp} onTouchStart={HandleTouchStart} onTouchEnd={EndDrag}/> */}
         </>
