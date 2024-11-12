@@ -8,6 +8,6 @@ export default defineConfig({
       'top-level-await': true //browsers can handle top-level-await features
     },
   },
-  // base: "/shader-app", // TODO: find some solution for hosting the website resources
+  base: "/shader-app",
   plugins: [react()],
 })
