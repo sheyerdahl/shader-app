@@ -38,6 +38,19 @@ export class Vector3 {
         return new Vector3([lookVectorX, lookVectorY, lookVectorZ])
     }
 
+    GetRightVector() {
+        const eulerAngles = this.vector
+        
+        const lookVector = this.GetLookVector()
+        lookVector.vector[0] = Math.abs(lookVector.vector[0]) < 0.0001 ? 0.0001 : lookVector.vector[0]
+        lookVector.vector[2] = Math.abs(lookVector.vector[2]) < 0.0001 ? 0.0001 : lookVector.vector[2]
+        const up = new Vector3([0, 1, 0])
+        console.log(lookVector.vector)
+        const rightVector = lookVector.CrossProduct(up)
+        console.log(rightVector.vector)
+        return rightVector
+    }
+
     GetInverse() {
         return new Vector3([-this.vector[0], -this.vector[1], -this.vector[2]])
     }

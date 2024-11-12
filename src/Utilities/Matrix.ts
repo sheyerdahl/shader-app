@@ -65,6 +65,18 @@ export default class FourDMatrix {
         return [rotationX, rotationY, rotationZ]
     }
 
+    RotationMatrixToLookVector(): [number, number, number] {
+        return [-this.matrix[8], -this.matrix[9], -this.matrix[10]]
+    }
+
+    RotationMatrixToUpVector(): [number, number, number] {
+        return [this.matrix[4], this.matrix[5], this.matrix[6]]
+    }
+
+    RotationMatrixToRightVector(): [number, number, number] {
+        return [this.matrix[0], this.matrix[1], this.matrix[2]]
+    }
+
     Multiply(matrixB: FourDMatrix) {
         const a = this.matrix
         const b = matrixB.matrix

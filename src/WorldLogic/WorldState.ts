@@ -727,6 +727,13 @@ function NewCube(data: NewCubeData): ThreeDObject {
     return newCube
 }
 
+function ReplaceWorldObjects(newWorldObjects: string) {
+    ClearWorldObjects()
+    JSON.parse(newWorldObjects).forEach((newObject: ThreeDObject) => {
+      AddWorldObject(newObject)
+    });
+}
+
 export {
     GetWorldObjects,
     AddWorldObject,
@@ -745,4 +752,5 @@ export {
     GetFrustumCornersWorldSpace,
     GetDirectionalLightMatrices,
     GetCameraViewMatrix,
+    ReplaceWorldObjects,
 }

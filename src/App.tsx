@@ -3,7 +3,7 @@ import Canvas from './Components/Canvas/Canvas'
 import Movement from './Components/Movement/Movement'
 import Explorer from './Containers/Explorer/Explorer'
 import { useContext, CSSProperties, useEffect, useState, useRef } from 'react'
-import { ThreeDObject, AddWorldObject, cube, GetWorldObjects, ClearWorldObjects, NewCube, GetPersistentWorldObjects } from './WorldLogic/WorldState'
+import { ThreeDObject, AddWorldObject, cube, GetWorldObjects, ClearWorldObjects, NewCube, GetPersistentWorldObjects, ReplaceWorldObjects } from './WorldLogic/WorldState'
 import { OBJToObject } from './Utilities/ReadOBJ'
 import { CameraOffset } from './WorldLogic/Camera'
 import DropDownButton from './Components/DropdownButton/DropdownButton'
@@ -20,6 +20,10 @@ function App() {
   const [selectedObjects, setSelectedObjects] = useContext(SelectedObjects)
   const [viewScale, setViewScale] = useState("1")
   const [shadowsEnabled, setShadowsEnabled] = useState(WorldSettings.ShadowsEnabled)
+  const [rotationVisuals, setRotationVisuals] = useState(WorldSettings.RotationVisuals)
+  const [clearWorldText, setClearWorldText] = useState<"Clear World" | "Are you sure?">("Clear World")
+  const [selectedSave, setSelectedSave] = useState("Save 1")
+  const [saveDataText, setSaveDataText] = useState("")
 
   useEffect(() => {
     if (loadedRef.current || loaded) {return}
@@ -31,10 +35,7 @@ function App() {
     const savedViewScale = localStorage.getItem("ViewScale")
 
     if (savedWorldObjects && savedWorldObjects !== "") {
-      ClearWorldObjects()
-      JSON.parse(savedWorldObjects).forEach((newObject: ThreeDObject) => {
-        AddWorldObject(newObject)
-      });
+      ReplaceWorldObjects(savedWorldObjects)
     }
 
     if (savedViewScale && savedViewScale !== "") {
@@ -78,8 +79,15 @@ function App() {
   }
 
   const OnClear = () => {
-    localStorage.setItem("WorldObjects", "")
-    ClearWorldObjects()
+    if (clearWorldText === "Clear World") {
+      setClearWorldText("Are you sure?")
+      setTimeout(() => {
+        setClearWorldText("Clear World")
+      }, 3000)
+    } else {
+      localStorage.setItem("WorldObjects", "")
+      ClearWorldObjects()
+    }
   }
 
   const OnToggleGameMode = () => {
@@ -96,6 +104,28 @@ function App() {
     setCurrentGamemode(WorldSettings.Gamemode)
   }
 
+  const onSave = () => {
+    localStorage.setItem(`${selectedSave}WorldObjects`, JSON.stringify(GetPersistentWorldObjects()))
+  }
+
+  const onLoad = () => {
+    const savedWorldObjects = localStorage.getItem(`${selectedSave}WorldObjects`)
+
+    if (savedWorldObjects && savedWorldObjects !== "") {
+      ReplaceWorldObjects(savedWorldObjects)
+    }
+  }
+
+  const onImport = () => {
+    if (saveDataText && saveDataText !== "") {
+      ReplaceWorldObjects(saveDataText)
+    }
+  }
+
+  const onExport = () => {
+    setSaveDataText(JSON.stringify(GetPersistentWorldObjects()))
+  }
+
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value
     setViewScale(newValue)
@@ -107,6 +137,11 @@ function App() {
     const newShadowsEnabled = !shadowsEnabled
     setShadowsEnabled(!shadowsEnabled)
     WorldSettings.ShadowsEnabled = newShadowsEnabled
+  }
+
+  const onRotationVisualsInputChange = () => {
+    WorldSettings.RotationVisuals = !rotationVisuals
+    setRotationVisuals(!rotationVisuals)
   }
 
   const DropDownFunctions = {
@@ -155,6 +190,10 @@ function App() {
     setSelectedObjects([newObject])
   }
 
+  const onSaveSelected = (item: string) => {
+    setSelectedSave(item)
+  }
+
   return (
     <>
       <div className='flex'>
@@ -172,7 +211,7 @@ function App() {
 
       <div className='flex items-center justify-center'>
         <button className='bg-red' onClick={OnClear}>
-          Clear World
+          {clearWorldText}
         </button>
 
         <DropDownButton buttonText='Add Object' onItemSelected={onItemSelected} items={dropDownItems}/>
@@ -194,22 +233,24 @@ function App() {
             <p className='b yellow'>Sun Shadows - WIP</p>
             <input className='w4 h1 bg-grey b--grey' type='checkbox' onChange={onSunShadowsInputChange} checked={shadowsEnabled} />
           </div>
+
+          <div className='ml2'>
+            <p className='b'>Rotation Visuals</p>
+            <input className='w4 h1 bg-grey b--grey' type='checkbox' onChange={onRotationVisualsInputChange} checked={rotationVisuals} />
+          </div>
       </div>
-      {/* <button onClick={OnAddCube}>
-        Add Cube
-      </button>
-
-      <button onClick={OnAddLight}>
-        Add Light
-      </button>
-
-      <button onClick={OnAddKitty}>
-        Add kitty
-      </button>
-
-      <button onClick={OnAddDogVideo}>
-        Add dog video
-      </button> */}
+      
+      <div className='flex items-center justify-center mt4'>
+        <DropDownButton buttonText={selectedSave} buttonStyle='bg-green' onItemSelected={onSaveSelected} items={["Save 1", "Save 2", "Save 3", "Save 4", "Save 5", "Save 6", "Save 7", "Save 8", "Save 9"]}/>
+        
+        <button onClick={onSave}> Save </button>
+        <button className='bg-dark-blue' onClick={onLoad}> Load </button>
+        <button className='bg-dark-green' onClick={onImport}> Import </button>
+        <button className='bg-red' onClick={onExport}> Export </button>
+        <div className='ml2'>
+          <input className=' ml2 w4' onChange={(event) => {setSaveDataText(event.target.value)}} placeholder='SaveData' value={saveDataText} />
+        </div>
+      </div>
     </>
   )
 }

@@ -6,9 +6,10 @@ import { DrawCube, DrawObject, DrawRay, DrawVector } from '../../WorldLogic/Debu
 import WorldSettings from '../../WorldLogic/WorldSettings'
 import { CameraOffset, CameraRotation, ScreenToCameraDirection } from '../../WorldLogic/Camera'
 import SelectedObjects from '../../Context/SelectedObjects'
-import { GetCameraViewMatrix, GetDirectionalLightMatrices, GetFrustumCornersWorldSpace } from '../../WorldLogic/WorldState'
+import { DeleteObjectsByName, GetCameraViewMatrix, GetDirectionalLightMatrices, GetFrustumCornersWorldSpace, GetObjectsByName } from '../../WorldLogic/WorldState'
 import FourDMatrix from '../../Utilities/Matrix'
 import { GetVector3Position } from '../../WorldLogic/ObjectUtils'
+import DrawCameraRotationVisuals from '../../WorldLogic/CameraRotationVisuals'
 
 const gridSize = 32
 const rotateSpeed = 1
@@ -136,6 +137,14 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
                 canvasSizeRef.current = [WorldSettings.Width, WorldSettings.Height]
                 ResizeCanvases()
                 forceUpdate()
+            }
+
+            if (WorldSettings.RotationVisuals) {
+                DrawCameraRotationVisuals()
+            } else if (GetObjectsByName("xAxisCameraVisualCORE").length > 0) {
+                DeleteObjectsByName("xAxisCameraVisualCORE")
+                DeleteObjectsByName("yAxisCameraVisualCORE")
+                DeleteObjectsByName("zAxisCameraVisualCORE")
             }
 
             handler.Render()

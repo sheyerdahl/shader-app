@@ -4,9 +4,10 @@ type DropDownButtonProps = {
   items: string[],
   onItemSelected: (item: string) => void,
   buttonText: string,
+  buttonStyle?: string,
 };
 
-function DropDownButton({items, onItemSelected, buttonText}: DropDownButtonProps) {
+function DropDownButton({items, onItemSelected, buttonText, buttonStyle}: DropDownButtonProps) {
   const [showDropDown, setShowDropDown] = useState<boolean>(false)
 
   const toggleDropDown = () => {
@@ -19,7 +20,7 @@ function DropDownButton({items, onItemSelected, buttonText}: DropDownButtonProps
 
   return (
     <>
-      <button className={showDropDown ? "active" : undefined} onClick={toggleDropDown} onBlur={() => setShowDropDown(false)}>
+      <button className={(showDropDown ? "active" : "") + buttonStyle} onClick={toggleDropDown} onBlur={() => setShowDropDown(false)}>
         <div className={`dropdown ${showDropDown ? "" : "dn"}`}>
           {items.map(
             (item, index) => {

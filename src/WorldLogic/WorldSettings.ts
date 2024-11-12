@@ -15,6 +15,7 @@ interface IWorldSettings {
     CameraNearPlane: number,
     ShadowCascadeLevels: [number, number, number, number],
     ShadowsEnabled: boolean,
+    RotationVisuals: boolean,
 }
 
 const WorldSettings: IWorldSettings = {
@@ -33,6 +34,7 @@ const WorldSettings: IWorldSettings = {
     ShadowCascadeLevels: [cameraFarPlane / 10.0, cameraFarPlane / 7.5, cameraFarPlane / 5.0, cameraFarPlane / 1.5],
     // ShadowCascadeLevels: [cameraFarPlane / 5, cameraFarPlane / 3.75, cameraFarPlane / 2.5, cameraFarPlane / 1.25],
     ShadowsEnabled: false,
+    RotationVisuals: true,
 }
 
 export default WorldSettings
