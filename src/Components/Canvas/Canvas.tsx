@@ -164,11 +164,13 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
         // const cameraLookVector = new Vector3(CameraRotation).GetLookVector()
         const rayDirection = screenToCameraDirection
 
-        DrawRay("DirectionRay", rayPosition, rayDirection, rayDistance, [1, 0.1, 0.1, 0.5], 10)
+        if (WorldSettings.RayVisuals) {
+            DrawRay("DirectionRay", rayPosition, rayDirection, rayDistance, [1, 0.1, 0.1, 0.5], 10)
+        }
 
-        DrawVector("xAxis", new Vector3([25, 0, 0]), [1, 0, 0, 1])
-        DrawVector("yAxis", new Vector3([0, 25, 0]), [0, 1, 0, 1])
-        DrawVector("zAxis", new Vector3([0, 0, 25]), [0, 0, 1, 1])
+        // DrawVector("xAxis", new Vector3([25, 0, 0]), [1, 0, 0, 1])
+        // DrawVector("yAxis", new Vector3([0, 25, 0]), [0, 1, 0, 1])
+        // DrawVector("zAxis", new Vector3([0, 0, 25]), [0, 0, 1, 1])
 
         // View frustrum centers - SHADOWMAP DEBUG
         const shadowCascadeLevels = WorldSettings.ShadowCascadeLevels
@@ -217,7 +219,9 @@ function Canvas<T extends HTMLCanvasElement>(props: CanvasHTMLAttributes<T>) {
 
         if (rayData) {
             const hitDistance = rayPosition.SubtractVector(rayData.HitPosition).GetMagnitude()
-            DrawRay("HitRay", rayPosition, rayDirection, hitDistance, [0.1, 0.1, 1, 1])
+            if (WorldSettings.RayVisuals) {
+                DrawRay("HitRay", rayPosition, rayDirection, hitDistance, [0.1, 0.1, 1, 1])
+            }
             setSelectedObjects([rayData.HitObject])
         } else if (selectedObjects.length > 0) {
             setSelectedObjects([])

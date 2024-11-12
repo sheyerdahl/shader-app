@@ -21,6 +21,7 @@ function App() {
   const [viewScale, setViewScale] = useState("1")
   const [shadowsEnabled, setShadowsEnabled] = useState(WorldSettings.ShadowsEnabled)
   const [rotationVisuals, setRotationVisuals] = useState(WorldSettings.RotationVisuals)
+  const [rayVisuals, setRayVisuals] = useState(WorldSettings.RayVisuals)
   const [clearWorldText, setClearWorldText] = useState<"Clear World" | "Are you sure?">("Clear World")
   const [selectedSave, setSelectedSave] = useState("Save 1")
   const [saveDataText, setSaveDataText] = useState("")
@@ -33,6 +34,18 @@ function App() {
 
     const savedWorldObjects = localStorage.getItem("WorldObjects")
     const savedViewScale = localStorage.getItem("ViewScale")
+    const savedShadowsEnabled = localStorage.getItem("ShadowsEnabled")
+    const savedRotationVisuals = localStorage.getItem("RotationVisuals")
+    const savedRayVisuals = localStorage.getItem("RayVisuals")
+
+    if (savedShadowsEnabled) {
+      setShadowsEnabled(savedShadowsEnabled == 'true' ? true : false)
+      WorldSettings.ShadowsEnabled = savedShadowsEnabled == 'true' ? true : false
+      setRotationVisuals(savedRotationVisuals == 'true' ? true : false)
+      WorldSettings.RotationVisuals = savedRotationVisuals == 'true' ? true : false
+      setRayVisuals(savedRayVisuals == 'true' ? true : false)
+      WorldSettings.RayVisuals = savedRayVisuals == 'true' ? true : false
+    }
 
     if (savedWorldObjects && savedWorldObjects !== "") {
       ReplaceWorldObjects(savedWorldObjects)
@@ -46,6 +59,9 @@ function App() {
     setInterval(() => {
       localStorage.setItem("WorldObjects", JSON.stringify(GetPersistentWorldObjects()))
       localStorage.setItem("ViewScale", String(WorldSettings.Width / 500))
+      localStorage.setItem("ShadowsEnabled", String(WorldSettings.ShadowsEnabled))
+      localStorage.setItem("RotationVisuals", String(WorldSettings.RotationVisuals))
+      localStorage.setItem("RayVisuals", String(WorldSettings.RayVisuals))
     }, 3000)
   }, [])
 
@@ -237,6 +253,11 @@ function App() {
           <div className='ml2'>
             <p className='b'>Rotation Visuals</p>
             <input className='w4 h1 bg-grey b--grey' type='checkbox' onChange={onRotationVisualsInputChange} checked={rotationVisuals} />
+          </div>
+
+          <div className='ml2'>
+            <p className='b'>Ray Visuals</p>
+            <input className='w4 h1 bg-grey b--grey' type='checkbox' onChange={() => {WorldSettings.RayVisuals = !rayVisuals; setRayVisuals(!rayVisuals)}} checked={rayVisuals} />
           </div>
       </div>
       
