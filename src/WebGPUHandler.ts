@@ -7,6 +7,11 @@ import FourDMatrix from "./Utilities/Matrix.ts"
 import { makeShaderDataDefinitions, makeStructuredView, getSizeAndAlignmentOfUnsizedArrayElement} from 'webgpu-utils'
 import { loadImageBitmap } from "./Utilities/Network.ts"
 import WorldSettings from "./WorldLogic/WorldSettings.ts"
+import cat_square from "./assets/cat_square.png"
+import dog_swimming from "./assets/dog_swimming.webm"
+import Sun1 from "./assets/Sun1.webp"
+import WhiteWoodPlank from "./assets/WhiteWoodPlank.jpg"
+import WoodPlank2 from "./assets/WoodPlank2.jpg"
 
 const testTextureWidth = 4
 const testTextureHeight = 4
@@ -15,15 +20,15 @@ const defs = makeShaderDataDefinitions(renderGeometryCode)
 const textureList: {name: string, videoURL?: string, video?: HTMLVideoElement, bitmap?: ImageBitmap}[] = [
     {  
         name: "None",
-        bitmap: await loadImageBitmap("/src/assets/cat_square.png"),
+        bitmap: await loadImageBitmap(cat_square),
     },
     {
         name: "kitty",
-        bitmap: await loadImageBitmap("/src/assets/cat_square.png"),
+        bitmap: await loadImageBitmap(cat_square),
     },
     {
         name: "DogVideo",
-        videoURL: "/src/assets/dog_swimming.webm",
+        videoURL: dog_swimming,
         video: document.createElement("video"),
     },
     {
@@ -32,15 +37,15 @@ const textureList: {name: string, videoURL?: string, video?: HTMLVideoElement, b
     },
     {
         name: "WhiteWoodPlank",
-        bitmap: await loadImageBitmap("/src/assets/WhiteWoodPlank.jpg"),
+        bitmap: await loadImageBitmap(WhiteWoodPlank),
     },
     {
         name: "WoodPlank2",
-        bitmap: await loadImageBitmap("/src/assets/WoodPlank2.jpg"),
+        bitmap: await loadImageBitmap(WoodPlank2),
     },
     {
         name: "Sun",
-        bitmap: await loadImageBitmap("/src/assets/Sun1.webp"),
+        bitmap: await loadImageBitmap(Sun1),
     },
 ]
 
