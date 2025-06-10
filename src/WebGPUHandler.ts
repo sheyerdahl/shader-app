@@ -194,7 +194,7 @@ export default class WebGPUHandler {
                 {
                     binding: 11,
                     visibility: GPUShaderStage.FRAGMENT,
-                    sampler: {},
+                    sampler: {type: "non-filtering"},
                 },
                 {
                     binding: 12,
